@@ -1,55 +1,13 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <div className="App">
-//       <div>
-//         <a href="https://vitejs.dev" target="_blank">
-//           <img src="/vite.svg" className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://reactjs.org" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.jsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </div>
-//   )
-// }
-
-// export default App
-
-
-
-
-
-
-import { useState, useEffect } from "react";
-import { Outlet } from "react-router-dom";
-import db from '../utils/db';
-import { Link } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
+import { useState, useEffect } from 'react';
+import db from './utils/db';
+import { Link } from 'react-router-dom';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import './App.css';
-
 
 const App = () => {
 
-  //creates state variable
-  const [contacts, setContacts] = useState ([]);
+  // create state variable
+  const [contacts, setContacts] = useState([]);
 
   //create a function to fetch the data from firestore
   const fetchContacts = async () => {
@@ -61,12 +19,12 @@ const App = () => {
     setContacts(data);
   }
 
+  //when the page loads, this will run once
   useEffect(() => {
+    
     fetchContacts();
+    
   }, []);
-
-  console.log(contacts);
-
 
   return (
     <>
@@ -74,13 +32,15 @@ const App = () => {
       <ul>
         {contacts.map((contact) => (
           <li key={contact.id}>
-            <Link to={`/contact/${contact.id} `}>
-            {`${contact.firstName} ${contact.lastName}`}
+            <Link to={`/contact/${contact.id}`}>
+              {(contact.first_name || contact.firstName)} {(contact.last_name || contact.lastName)}
             </Link>
           </li>
         ))}
-      </ul>
-
+    </ul>
+    <button>
+      <Link to="/add">Add Contact</Link>
+    </button>
     </>
   );
 }

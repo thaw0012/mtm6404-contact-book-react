@@ -1,46 +1,33 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { doc, getDoc, deleteDoc } from 'firebase/firestore'
 import db from '../utils/db';
-import { doc, getDocs } from "firebase/firestore";
-import {useParams} from "react-router-dom";
 
-export const Contact = () => {
+function Contact() {
+  const { id } = useParams()
+  const [contact, setContact] = useState(null)
+  const navigate = useNavigate()
 
-    //set up a state variable for contact
-    const [contact, setContact] = useState({});
+  useEffect(() => {
+    const docRef = doc(db, 'contacts', id)
+    getDoc(docRef).then(s => s.exists() && setContact(s.data()))
+  }, [id])
 
-    //id from the route params
-    const {id} = useParams();
+  const deleteHandler = async () => {
+    await deleteDoc(doc(db, 'contacts', id))
+    navigate('/')
+  }
 
-    //create a function to fetch contact
-    const fetchContactById = async (contactId) => {
-        const docRef = doc(db, "contacts", contactId);
-        const docSnapshot = await getDoc(docRef);
+  if (!contact) return <p>Loading...</p>
 
-        //check if the doc exists in firestore
-        if (docSnapshot.exists()) {
-            setContact({
-                id: docSnapshot.id,
-                ...docSnapshot.data()
-            });
-        } else {
-            alert('Contact does not exist in our records! Please provide a valid contact id');
-            return null;
-        }
-    }
-
-    useEffect(() => {
-        fetchContactById(id);
-    }, [id]);
-
-    // console.log(contact);
-
-    return (
-        //Contact View
-        <>
-            <h1>{`${contact.firstName} ${contact.lastName} `}</h1>
-            <p>Email: {contact.email} </p>
-        </>
-    );
+  return (
+    <div className="details">
+      <h2>{contact.first_name} {contact.last_name}</h2>
+      <p>Email: {contact.email}</p>
+      <button onClick={deleteHandler}>Delete Contact</button>
+    </div>
+  )
 }
 
-export default Contact;
+export default Contact
+
